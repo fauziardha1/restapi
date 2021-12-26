@@ -1,0 +1,22 @@
+# hidden directory
+.docker*
+.idea
+.vscode
+
+# directory
+.idea/*
+log/*
+vendor/*
+.DS_Store/*
+
+# file
+*.out
+*scannerwork
+tokolinter.so
+./restapi
+TODO.todo
+
+/files/etc/toko-configuration/newretail-intools.development.json
+/files/etc/toko-credentials/newretail-intools.development.json
+
+/internal/*/doc/http/http-client.env.json
