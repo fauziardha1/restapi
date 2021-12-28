@@ -55,7 +55,13 @@ func main() {
 	r.HandleFunc("/api/project/update", HandleUpdateProject).Methods("PATCH")
 	r.HandleFunc("/api/project/delete", HandleDeleteProject).Methods("DELETE")
 
+	// measurements handling
+	r.HandleFunc("/api/measurement/list", HandleGetMeasurementList).Methods("POST")
+	r.HandleFunc("/api/measurement/create", HandleCreateMeasurement).Methods("POST")
+	r.HandleFunc("/api/measurement/delete/all", HandleDeleteAllMeasurements).Methods("DELETE")
+
 	log.Fatal(http.ListenAndServe(":8000", r))
+	fmt.Println("Server started on port 8000")
 
 }
 
@@ -88,6 +94,60 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(respons)
 }
 
+// HandleCreateMeasurement is a function that handles the POST request to /api/measurement/create
+func HandleCreateMeasurement(w http.ResponseWriter, r *http.Request) {
+	projectID := r.FormValue("project_id")
+	fileName := r.FormValue("file_name")
+	srpval := r.FormValue("srp_val")
+	ocpval := r.FormValue("ocp_val")
+	lspval := r.FormValue("lsp_val")
+	ispval := r.FormValue("isp_val")
+	dipval := r.FormValue("dip_val")
+
+	if projectID == "" || fileName == "" || srpval == "" || ocpval == "" || lspval == "" || ispval == "" || dipval == "" {
+		respons := JSONResponse{Status: 400, Message: "Please fill all the fields"}
+		json.NewEncoder(w).Encode(respons)
+		return
+	} else {
+		db := setupDB()
+		fmt.Println("Endpoint Hit: HandleCreateMeasurement")
+
+		var measurementID int
+		err := db.QueryRow(`INSERT INTO measurements (
+			project_id, 
+			file_name, 
+			srp_val, 
+			ocp_val, 
+			lsp_val, 
+			isp_val, 
+			dip_val,
+			created_at, 
+			updated_at) 
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+			returning id;`,
+			projectID,
+			fileName,
+			srpval,
+			ocpval,
+			lspval,
+			ispval,
+			dipval,
+			time.Now(),
+			time.Now(),
+		).Scan(&measurementID)
+		if err != nil {
+			panic(err)
+		}
+
+		respons := MeasurementJSONResponse{
+			Status:  200,
+			Message: "Success",
+			Data:    []Measurement{{ID: measurementID}},
+		}
+		json.NewEncoder(w).Encode(respons)
+	}
+}
+
 // HandleCreateProject is a function that handles the POST request to /api/project/create
 func HandleCreateProject(w http.ResponseWriter, r *http.Request) {
 	user_id := r.FormValue("user_id")
@@ -113,7 +173,30 @@ func HandleCreateProject(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// HandleUpdateProject is a function that handles the PATCH request to /api/project/delete
+// HandleDeleteAllMeasurements is a function that handles the DELETE request to /api/measurement/delete/all
+// it will delete all measurements for a given project
+func HandleDeleteAllMeasurements(w http.ResponseWriter, r *http.Request) {
+	projectID := r.FormValue("project_id")
+
+	if projectID == "" {
+		respons := JSONResponse{Status: 400, Message: "Please fill all the fields"}
+		json.NewEncoder(w).Encode(respons)
+		return
+	} else {
+		db := setupDB()
+		fmt.Println("Endpoint Hit: HandleDeleteAllMeasurements")
+
+		_, err := db.Exec("DELETE FROM measurements WHERE project_id = $1;", projectID)
+		if err != nil {
+			panic(err)
+		}
+
+		respons := JSONResponse{Status: 200, Message: "Success"}
+		json.NewEncoder(w).Encode(respons)
+	}
+}
+
+// HandleDeleteProject is a function that handles the PATCH request to /api/project/delete
 func HandleDeleteProject(w http.ResponseWriter, r *http.Request) {
 	projectID := r.FormValue("project_id")
 
@@ -168,6 +251,54 @@ func HandleGetProjectList(w http.ResponseWriter, r *http.Request) {
 			json.NewEncoder(w).Encode(respons)
 		} else {
 			respons := JSONResponse{Status: 400, Message: "No projects found"}
+			json.NewEncoder(w).Encode(respons)
+		}
+	}
+}
+
+// HandleGetMeasurementList is a function that handles the GET request to /api/measurement/list
+func HandleGetMeasurementList(w http.ResponseWriter, r *http.Request) {
+	projectID := r.FormValue("project_id")
+
+	if projectID == "" {
+		respons := JSONResponse{Status: 400, Message: "Please fill all the fields"}
+		json.NewEncoder(w).Encode(respons)
+		return
+	} else {
+		db := setupDB()
+		fmt.Println("Endpoint Hit: HandleGetMeasurementList")
+
+		rows, err := db.Query("SELECT * FROM measurements WHERE project_id = $1", projectID)
+		if err != nil {
+			panic(err)
+		}
+
+		measurements := make([]Measurement, 0, 1)
+		for rows.Next() {
+			var measurement Measurement
+			err = rows.Scan(
+				&measurement.ID,
+				&measurement.ProjectID,
+				&measurement.FileName,
+				&measurement.SRPValue,
+				&measurement.OCPValue,
+				&measurement.LSPValue,
+				&measurement.ISPValue,
+				&measurement.DIPValue,
+				&measurement.CreatedAt,
+				&measurement.UpdatedAt,
+			)
+			if err != nil {
+				panic(err)
+			}
+			measurements = append(measurements, measurement)
+		}
+
+		if len(measurements) > 0 {
+			respons := MeasurementJSONResponse{Status: 200, Message: "Success", Data: measurements}
+			json.NewEncoder(w).Encode(respons)
+		} else {
+			respons := JSONResponse{Status: 400, Message: "No measurements found"}
 			json.NewEncoder(w).Encode(respons)
 		}
 	}

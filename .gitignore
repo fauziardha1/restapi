@@ -13,7 +13,7 @@ vendor/*
 *.out
 *scannerwork
 tokolinter.so
-./restapi
+restapi
 TODO.todo
 
 /files/etc/toko-configuration/newretail-intools.development.json

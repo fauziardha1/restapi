@@ -164,3 +164,97 @@
             "data": null
         } 
         ```
+7. **"api/measurement/list" => Method Post**
+    input : formfield
+    ```
+    project_id : [project_id]
+    ```
+    response : 
+     *  Success ✅
+        ```{
+            "status": 200,
+            "message": "Success",
+            "data": [
+                {
+                "id": 3,
+                "project_id": 1,
+                "file_name": "awesome.mdj",
+                "srp_value": "0",
+                "ocp_value": "0",
+                "lsp_value": "0",
+                "isp_value": "0",
+                "dip_value": "0",
+                "created_at": "2021-12-27T22:08:18Z",
+                "updated_at": "2021-12-27T22:08:18Z"
+                },
+                {
+                "id": 1,
+                "project_id": 1,
+                "file_name": "hello.mdj",
+                "srp_value": "1.2",
+                "ocp_value": "0",
+                "lsp_value": "0",
+                "isp_value": "0",
+                "dip_value": "0",
+                "created_at": "2021-12-27T22:08:18Z",
+                "updated_at": "2021-12-27T22:08:18Z"
+                }
+            ]
+            }
+        ```
+     *  Fail ❌
+        ``` 
+        {
+            "status": 400,
+            "message": "No measurements found"
+        }
+        ```
+8. **"api/measurement/create" => Method Post**
+    input : formfield
+    ```
+    project_id  : [project_id]
+    file_name   : [file_name]
+    srp_val     : [srp_val]
+    ocp_val     : [ocp_val]
+    lsp_val     : [lsp_val]
+    isp_val     : [isp_val]
+    dip_val     : [dip_val]
+    ```
+    response : 
+     *  Success ✅
+        ```{
+            "status": 200,
+            "message": "Success",
+            "data": [
+                {
+                "id": 6
+                }
+            ]
+            }
+        ```
+     *  Fail ❌
+        ``` 
+        {
+            "status": 400,
+            "message": "Please fill all the fields"
+        }
+        ```
+9. **"api/measurement/delete/all" => Method Delete**
+    input : formfield
+    ```
+    project_id  : [project_id]
+    ```
+    response : 
+     *  Success ✅
+        ```{
+            "status": 200,
+            "message": "Success"
+            }
+        ```
+     *  Fail ❌
+        ``` 
+        {
+            "status": 400,
+            "message": "Please fill all the fields"
+        }
+        ```
