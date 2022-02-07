@@ -60,18 +60,25 @@ func main() {
 	r.HandleFunc("/api/measurement/create", HandleCreateMeasurement).Methods("POST")
 	r.HandleFunc("/api/measurement/delete/all", HandleDeleteAllMeasurements).Methods("DELETE")
 
-	log.Fatal(http.ListenAndServe(":8000", r))
-	fmt.Println("Server started on port 8000")
+	log.Fatal(http.ListenAndServe(":17001", r))
+	fmt.Println("Server started on port 17001")
 
 }
 
 func homePage(w http.ResponseWriter, r *http.Request) {
+	enableCors(&w)
 	fmt.Fprintf(w, "Welcome to the HomePage!")
 	fmt.Println("Endpoint Hit: homePage")
 }
 
+// enable cors
+func enableCors(w *http.ResponseWriter) {
+	(*w).Header().Set("Access-Control-Allow-Origin", "*")
+}
+
 // GetUsers is a function that handles the GET request to /api/users
 func GetUsers(w http.ResponseWriter, r *http.Request) {
+	enableCors(&w)
 	db := setupDB()
 	fmt.Println("Endpoint Hit: GetUsers")
 
@@ -96,6 +103,7 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 
 // HandleCreateMeasurement is a function that handles the POST request to /api/measurement/create
 func HandleCreateMeasurement(w http.ResponseWriter, r *http.Request) {
+	enableCors(&w)
 	projectID := r.FormValue("project_id")
 	fileName := r.FormValue("file_name")
 	srpval := r.FormValue("srp_val")
@@ -150,6 +158,7 @@ func HandleCreateMeasurement(w http.ResponseWriter, r *http.Request) {
 
 // HandleCreateProject is a function that handles the POST request to /api/project/create
 func HandleCreateProject(w http.ResponseWriter, r *http.Request) {
+	enableCors(&w)
 	user_id := r.FormValue("user_id")
 	name := r.FormValue("project_name")
 
@@ -176,6 +185,7 @@ func HandleCreateProject(w http.ResponseWriter, r *http.Request) {
 // HandleDeleteAllMeasurements is a function that handles the DELETE request to /api/measurement/delete/all
 // it will delete all measurements for a given project
 func HandleDeleteAllMeasurements(w http.ResponseWriter, r *http.Request) {
+	enableCors(&w)
 	projectID := r.FormValue("project_id")
 
 	if projectID == "" {
@@ -198,6 +208,7 @@ func HandleDeleteAllMeasurements(w http.ResponseWriter, r *http.Request) {
 
 // HandleDeleteProject is a function that handles the PATCH request to /api/project/delete
 func HandleDeleteProject(w http.ResponseWriter, r *http.Request) {
+	enableCors(&w)
 	projectID := r.FormValue("project_id")
 
 	if projectID == "" {
@@ -220,6 +231,7 @@ func HandleDeleteProject(w http.ResponseWriter, r *http.Request) {
 
 // HandleGetProjectList is a function that handles the GET request to /api/projects/list
 func HandleGetProjectList(w http.ResponseWriter, r *http.Request) {
+	enableCors(&w)
 	// get the user data form the request
 	user_id := r.FormValue("user_id")
 
@@ -258,6 +270,7 @@ func HandleGetProjectList(w http.ResponseWriter, r *http.Request) {
 
 // HandleGetMeasurementList is a function that handles the GET request to /api/measurement/list
 func HandleGetMeasurementList(w http.ResponseWriter, r *http.Request) {
+	enableCors(&w)
 	projectID := r.FormValue("project_id")
 
 	if projectID == "" {
@@ -306,6 +319,7 @@ func HandleGetMeasurementList(w http.ResponseWriter, r *http.Request) {
 
 // HandleUpdateProject is a function that handles the PATCH request to /api/project/update
 func HandleUpdateProject(w http.ResponseWriter, r *http.Request) {
+	enableCors(&w)
 	projectID := r.FormValue("project_id")
 	newname := r.FormValue("project_name")
 	updatedTime := time.Now()
@@ -337,6 +351,7 @@ func HandleUpdateProject(w http.ResponseWriter, r *http.Request) {
 // login is a function that handles the POST request to /api/user/login
 // it will return a JSON response with the user information
 func login(w http.ResponseWriter, r *http.Request) {
+	enableCors(&w)
 	// get the user data form the request
 	username := r.FormValue("username")
 	password := r.FormValue("password")
@@ -380,6 +395,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 // register is a function that handles the POST request to /api/user/register
 // it will return a JSON response with the user information
 func register(w http.ResponseWriter, r *http.Request) {
+	enableCors(&w)
 	username := r.FormValue("username")
 	password := r.FormValue("password")
 	email := r.FormValue("email")
